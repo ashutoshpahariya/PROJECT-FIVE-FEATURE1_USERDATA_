@@ -155,6 +155,14 @@ const getproduct = async (req, res) => {
                 return res.status(404).send({ status: false, msg: "No products found" })
             }
             return res.status(200).send({ status: true, message: `${countproducts} Products Found`, data: getAllProducts });
+        }else{
+            let getProducts = await productModel.find()
+            const countproduct = getProducts.length
+            if (!(countproduct > 0)) {
+                return res.status(404).send({ status: false, msg: "No products found" })
+            }
+            return res.status(200).send({ status: true, message: `${countproduct} Products Found`, data: getProducts });
+
         }
     } catch (err) {
         return res.status(500).send({ status: false, msg: err.message })

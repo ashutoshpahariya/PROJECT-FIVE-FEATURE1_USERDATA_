@@ -71,9 +71,6 @@ const isValidstatus = function(status) {
     return ['pending', 'cancelled', 'completed'].indexOf(status) !== -1
 }
 
-
-
-
 module.exports = {validateEmail,
     isValid, isValidRequestBody, isValidSyntaxOfEmail,
     isValidMobileNum, alphabetTestOfString, isString,

@@ -93,7 +93,7 @@ console.log(err)
 
 //-----------------SECOND API UPDATE REDUCE QUANTITY OR REMOVE PRODUCT
 const updateCartList = async function (req, res) {
-    try {
+    try { 
         const userId = req.params.userId
         const userIdFromToken = req.userId
 
@@ -105,11 +105,11 @@ const updateCartList = async function (req, res) {
         }
         const user = await userModel.findById({ _id: userId })
         if (!user) {
-            res.status(400).send({ status: false, msg: "user not found" })
+          return  res.status(400).send({ status: false, msg: "user not found" })
         }
         if (userId.toString() !== userIdFromToken) {
-            res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
-            return
+           return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
+            
         }
         //authentication required
         const requestBody = req.body
@@ -118,9 +118,9 @@ const updateCartList = async function (req, res) {
         if (!findCart) {
             return res.status(400).send({ status: false, message: `cart does not exist` })
         }
-
+       
         const product = await productModel.findOne({ _id: req.body.productId, isDeleted: false })
-
+console.log(product)
         //--removeProduct == 1 
         //KEY IS USE FOR REMOVE PRODUCT FROM QUANTITY ONE BY ONE
         if (removeProduct == 1) {
@@ -128,6 +128,7 @@ const updateCartList = async function (req, res) {
                 if (findCart.items[i].productId == productId) {
                     //---REMOVE THAT PRODUCT ID FROM ITEM ARRAY
                     //---AFTER PRODUCT PRICE REMOVE DECREASE TOTAL PRICE UPDATE 
+                   
                     const updatedPrice = findCart.totalPrice - product.price
                     //---AFTER QUANTITY REMOVE DECREASE QUANTITY UPDATE
                     findCart.items[i].quantity = findCart.items[i].quantity - 1
@@ -148,8 +149,9 @@ const updateCartList = async function (req, res) {
                         return res.status(201).send({ status: true, message: `one Product removed from the cart successfully`, data: response })
 
                     }
+                } else {
+                    return res.status(400).send({ status: false, message: "given Product id does not match" });
                 }
-
             }
         }
         //--removeProduct == 0 
@@ -167,6 +169,8 @@ const updateCartList = async function (req, res) {
                         { items: findCart.items, totalItems: totalItems1, totalPrice: updatedPrice }, { new: true })
                     return res.status(201).send({ status: true, message: ` product removed from the cart successfully`, data: response })
 
+                }else {
+                    return res.status(400).send({ status: false, message: "given Product id does not match" });
                 }
             }
         }

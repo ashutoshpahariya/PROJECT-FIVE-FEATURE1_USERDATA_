@@ -39,7 +39,7 @@ router.delete('/products/:productId',productController.deleteProduct)
 
 
 //-----------------FEATURE III - CART API
-//-----------------FIRST API CREATE PRODUCT
+//-----------------FIRST API CREATE CART
 router.post('/users/:userId/cart',myMiddleware.getUserDetails,cartController.CartProduct)
 
 //-----------------SECOND API UPDATE CART DETAIL
