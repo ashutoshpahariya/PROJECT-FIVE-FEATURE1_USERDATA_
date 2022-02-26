@@ -26,7 +26,6 @@ const isValidObjectId = function (objectId) {
     return mongoose.Types.ObjectId.isValid(objectId)
 }
 const isString = function (value) {
-
     //--IT CHECK THE VALUE CONTAIN ONLY SPACE OR NOT
     if (typeof value === 'string' && value.trim().length === 0) return false
     return true;

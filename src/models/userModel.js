@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
 
     phone: { type: String, required: true, unique: true, trim: true, valid: 'valid Indian mobile number' },
 
-    password: { type:String, required: true, trim: true },
+    password: { type: String, required: true, trim: true },
     address:
     {
         shipping:

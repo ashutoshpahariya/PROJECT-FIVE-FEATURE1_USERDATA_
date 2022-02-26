@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
 
-
 const orderSchema = new mongoose.Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,ref: 'User',
-        required: true,unique: true},
+        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+        required: true, unique: true
+    },
 
     items: [{
-        productId: { type: mongoose.Schema.Types.ObjectId,
-            ref: 'productModel',required: true },
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'productModel', required: true
+        },
         quantity: {
             type: Number,
             required: true,
@@ -24,18 +26,19 @@ const orderSchema = new mongoose.Schema({
         required: true,
         //"Holds total number of items in the cart"
     },
-       totalQuantity: {
+    totalQuantity: {
         type: Number,
         required: true,
         //"Holds total number of items in the cart"
     },
-     cancellable: {type:Boolean, default: true},
+    cancellable: { type: Boolean, default: true },
 
-      status: {type:String, default: 'pending', enum:[ "pending" , "completed" , " cancelled" ]},
+    status: { type: String, default: 'pending', enum: ["pending", "completed", "cancelled"] },
 
-       deletedAt:Date,
-       
-       isDeleted: {type:Boolean, default: false},
+    deletedAt: Date,
+
+    isDeleted: { type: Boolean, default: false },
+
 }, { timestamps: true })
 module.exports = mongoose.model('order', orderSchema)
 

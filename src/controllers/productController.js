@@ -148,7 +148,6 @@ const getproduct = async (req, res) => {
                     return res.status(400).send({ status: false, message: "Please provide valid value of priceSort" })
                 }
             }
-
             let getAllProducts = await productModel.find(query).sort({ price: query.priceSort })
             const countproducts = getAllProducts.length
             if (!(countproducts > 0)) {
@@ -190,25 +189,24 @@ const getproductlist = async (req, res) => {
 
 
 
+
 //-----------------FOURTH API UPDATE PRODUCT DETAIL
 
 const updateProduct = async function (req, res) {
     try {
         let requestBody = req.body
         const productId = req.params.productId
-
-
-        if (!validateBody.isValidRequestBody(requestBody)) {
-            res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide  details to update' })
-            return
-        }
         if (!validateBody.isValidObjectId(productId)) {
-            return res.status(404).send({ status: false, message: "productId is not valid" })
+            return res.status(404).send({ status: false, message: `${productId} productId is not valid` })
         }
         const product = await productModel.findOne({ _id: productId, isDeleted: false, })
         console.log(product)
         if (!product) {
-            res.status(404).send({ status: false, message: `product not found or it is Deleted` })
+            res.status(404).send({ status: false, message: `${productId} product not found or it is Deleted` })
+            return
+        }
+        if (!validateBody.isValidRequestBody(requestBody)) {
+            res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide  details to update' })
             return
         }
         //-----UPDATE BODY DETAILS
@@ -280,16 +278,14 @@ const updateProduct = async function (req, res) {
                 }
 
             }
-
             if (!validateBody.isString(installments)) {
                 return res.status(400).send({ status: false, message: " installments is missing ! Please provide installment to update." })
             }
             if (installments) {
-                if (installments !== Number) {
+                if (typeof installments !=  Number){
                     return res.status(400).send({ status: false, message: " Please provide installment in Number." })
                 }
             }
-
             let files = req.files;
             if ((files && files.length > 0)) {
                 const productImage = await uploadFile(files[0])
@@ -301,21 +297,25 @@ const updateProduct = async function (req, res) {
                 res.status(200).send({ status: true, message: "product updated successfully", data: updateProduct });
             }
         }
-
-
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
     }
 }
 
 
+
+
 //-----------------FIFTH API DELETE PRODUCT FROM DB
 const deleteProduct = async (req, res) => {
     try {
         let params = req.params.productId;
+
+        if (!validateBody.isValidObjectId(params)) {
+            return res.status(400).send({ status: false, message: `${params} productId is not valid` })
+        }
         let check = await productModel.findById(params)
         if (!check) {
-            return res.status(400).send({ status: false, message: "Please Provide a valid productId in path params" });;
+            return res.status(404).send({ status: false, message: "No Products Found With This ProductId" });;
         }
         let data = await productModel.findOne({ _id: params, isDeleted: false });
         if (!data) {

@@ -11,11 +11,14 @@ const myMiddleware = require('../middleWares/middleWare')
 //-----------------FEATURE I - USER API
 //-----------------FIRST API CREATE USER
 router.post('/user', userController.userRegistration)
+
 //-----------------SECOND API USER LOGIN
 router.post('/userlogin', userController.userLogin)
+
 //-----------------THIRD API GET USER DETAILS
 router.get('/user/:userId',myMiddleware.getUserDetails,userController.getUserList)
-//-----------------THIRD API UPDATE USER DETAILS
+
+//-----------------FOURTH API UPDATE USER DETAILS
 router.put('/user/:userId',myMiddleware.getUserDetails,userController.updateUserList)
 
 
@@ -61,7 +64,19 @@ router.post('/users/:userId/orders',myMiddleware.getUserDetails,orderController.
 router.put('/users/:userId/orders',myMiddleware.getUserDetails,orderController.updateOrder)
 
 
+
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -5,21 +5,22 @@ const validateBody = require('../validation/validation');
 
 
 
+
 const createOrder = async function (req, res) {
     try {
         const userId = req.params.userId
         let tokenId = req.userId
         let requestBody = req.body
-        if (!(validateBody.isValidObjectId(userId) && validateBody.isValidObjectId(tokenId))) {
-            return res.status(400).send({ status: false, message: "userId or token is not valid" });;
-        }
-        const userDetails = await userModel.findOne({ _id: userId })
-        console.log(userDetails)
-        if (!userDetails) {
-            return res.status(400).send({ status: false, message: `userId not Valid` });
+        if (!(validateBody.isValidObjectId(userId) )) {
+            return res.status(400).send({ status: false, message: "userId is not valid" });;
         }
         if (!(userId.toString() == tokenId.toString())) {
             return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
+        }
+        const userDetails = await userModel.findOne({ _id: userId })
+        //console.log(userDetails)
+        if (!userDetails) {
+            return res.status(400).send({ status: false, message: `userId not Valid` });
         }
         let { cartId, cancellable, status } = requestBody
 
@@ -27,20 +28,24 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please provide data for successful Create order" });
         }
         if (!validateBody.isString(cartId)) {
-            return res.status(400).send({ status: false, message: "Please provide data for CartId " });
+            return res.status(400).send({ status: false, message: "Please provide data for Cart Id " });
         }
         if (!validateBody.isString(status)) {
         if (!validateBody.isValidstatus(status)) {
             return res.status(400).send({ status: false, message: "Status should be among 'pending', 'cancelled', 'completed' " });
         } }
         const cartDetails = await cartModel.findOne({ _id: cartId })
-        console.log(cartDetails)
+        //console.log(cartDetails)
         if (!cartDetails) {
-            return res.status(400).send({ status: false, message: `cart not present with given ID` });
+            return res.status(400).send({ status: false, message: `cart not present with given id` });
         }
+        if(cartDetails.items.length == 0){
+            return res.status(400).send({ status: false, message: "Cannot create order of already deleted cart" });
+        }
+
         //-----UPDATE ORDER LEGTH
         const updateItemslength = cartDetails.items.length
-        console.log(updateItemslength, "total length")
+        //console.log(updateItemslength, "total length")
 
 
         let updatequantityorder = 0;

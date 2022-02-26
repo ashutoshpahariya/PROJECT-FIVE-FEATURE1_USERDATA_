@@ -3,12 +3,10 @@ const validateBody = require('../validation/validation');
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const myPlaintextPassword = 's0/\/\P4$$w0rD';
-const someOtherPlaintextPassword = 'not_bacon';
 const aws = require("aws-sdk");
 
 
-//---------S3
+//---------------S3
 aws.config.update({
     accessKeyId: "AKIAY3L35MCRRMC6253G",//--ID
     secretAccessKey: "88NOFLHQrap/1G2LqUy9YkFbFRe/GNERsCyKvTZA",//--LIKE YOUR SECRET PASSWORD
@@ -39,6 +37,7 @@ let uploadFile = async (file) => {
         });
     });
 };
+
 
 
 
@@ -80,7 +79,7 @@ const userRegistration = async (req, res) => {
             return res.status(400).send({ status: false, message: "Please provide phone number or phone field" });
         }
         if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(phone.trim())) {
-            return res.status(400).send({ status: false, message: `Phone number should be a  valid indian number` });
+            return res.status(400).send({ status: false, message: `Phone number should be a valid indian number` });
         }
         const duplicatePhone = await userModel.findOne({ phone })
         if (duplicatePhone) {
@@ -90,7 +89,7 @@ const userRegistration = async (req, res) => {
             return res.status(400).send({ status: false, message: "Please provide password or password field" });;
         }
         if (!(password.trim().length >= 8 && password.trim().length <= 15)) {
-            return res.status(400).send({ status: false, message: "Please provide password with minimum 8 and maximum 14 characters" });;
+            return res.status(400).send({ status: false, message: "Please provide password with minimum 8 and maximum 15 characters" });;
         }
         if (!validateBody.isValid(address)) {
             return res.status(400).send({ status: false, message: "Please provide address or address field" });
@@ -129,6 +128,7 @@ const userRegistration = async (req, res) => {
 }
 
 
+
 //-----------------SECOND API USER LOGIN
 const userLogin = async (req, res) => {
     try {
@@ -159,7 +159,6 @@ const userLogin = async (req, res) => {
                     iat: Math.floor(Date.now() / 1000),
                     exp: Math.floor(Date.now() / 1000) + 60 * 360
                 }, 'developerprivatekey')
-
                 return res.status(200).send({
                     "status": true,
                     Message: " user logged Succesfull",
@@ -169,15 +168,16 @@ const userLogin = async (req, res) => {
                     }
                 });
             } else {
-                res.status(401).send({ error: "User does not exist with that password" });
+                res.status(400).send({ error: "User does not exist with that password" });
             }
         } else {
-            return res.status(400).send({ status: false, message: "Oops...Invalid credentials" });
+            return res.status(401).send({ status: false, message: "Oops...Invalid credentials" });
         }
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message });
     }
 };
+
 
 
 
@@ -206,22 +206,22 @@ const getUserList = async (req, res) => {
     }
 }
 
-
 //-----------------FOURTH API UPDATE USER DETAILS
 const updateUserList = async (req, res) => {
     try {
         let userId = req.params.userId
         let tokenId = req.userId
         let updateBody = req.body
+
+        if (!validateBody.isValidObjectId(userId)) {
+            return res.status(400).send({ status: false, message: "userId is not valid" });;
+        }
         const data = await userModel.findById(userId)
         if (!data) {
             return res.status(404).send({ status: false, message: "User does not exist with this userid" })
         }
         if (!(userId.toString() == tokenId.toString())) {
             return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
-        }
-        if (!(validateBody.isValidObjectId(userId) && validateBody.isValidObjectId(tokenId))) {
-            return res.status(400).send({ status: false, message: "userId or token is not valid" });;
         }
         const { fname, lname, email, profileImage, phone, password, address } = updateBody;
         if (!validateBody.isValidRequestBody(updateBody)) {
@@ -263,7 +263,7 @@ const updateUserList = async (req, res) => {
             }
             if (password) {
                 if (!(password.trim().length >= 8 && password.trim().length <= 15)) {
-                    return res.status(400).send({ status: false, message: "Please provide password with minimum 8 and maximum 14 characters" });;
+                    return res.status(400).send({ status: false, message: "Please provide password with minimum 8 and maximum 15 characters" });;
                 }
             }
             if (password) {
@@ -319,170 +319,4 @@ const updateUserList = async (req, res) => {
 
 
 
-
-
-
-// const updateUserList = async function (req, res) {
-
-//     try {
-//       let files = req.files;
-//         const requestBody = req.body
-//         const params = req.params
-//         const userId = params.userId  //req.params.userId
-//         const userIdFromToken = req.userId
-  
-       
-//         if (!validateBody.isValidObjectId(userId)) {
-//             res.status(400).send({ status: false, message: `${userId} is not a valid user id` })
-//             return
-//         }
-  
-//         if (!validateBody.isValidObjectId(userIdFromToken)) {
-//             return res.status(400).send({ status: false, message: `${userIdFromToken} Invalid user id ` })
-//         }
-  
-//         const user = await userModel.findOne({ _id: userId})
-//         if (!user) {
-//             return res.status(404).send({ status: false, message: `user not found` })
-//         }
-  
-//         if(userId.toString() !== userIdFromToken) {
-//             res.status(401).send({status: false, message: `Unauthorized access! Owner info doesn't match`});
-//             return
-//         }
-  
-//         if (!validateBody.isValidRequestBody(requestBody)) {
-//             res.status(400).send({ status: false, message: 'No paramateres passed. book unmodified' })
-//             return
-//         }
-  
-//         // Extract params
-//         let { fname, lname,email,profileImage,phone,password, address} = requestBody;
-//         let obj={}
-//         if(validateBody.isString(fname)){
-//           obj['fname']=fname
-//         }
-//         if(validateBody.isString(lname)){
-//           obj['lname']=lname
-//         }
-  
-//       if(validateBody.isString(email)){
-//           if (!validateBody.validateEmail(email)) {
-//              return res.status(400).send({ status: false, message: `Email should be a valid email address` })
-//           }
-//           let isEmailAlredyPresent = await userModel.findOne({ email: requestBody.email })
-  
-//            if (isEmailAlredyPresent) {
-//             return res.status(400).send({ status: false, message: `Email Already Present` });
-//          }
-//             //already present, VALID(done)
-//             obj['email']=email
-//         }
-        
-//       if(validateBody.isValidMobileNum(phone)){
-//         if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(phone)) {
-//           return res.status(400).send({ status: false, message: `Mobile should be a valid number` });
-//         }
-//         let isPhoneAlredyPresent = await userModel.findOne({ phone: requestBody.phone })
-  
-//         if (isPhoneAlredyPresent) {
-//         return res.status(400).send({ status: false, message: `Phone Already Present` });
-//         }
-//         //already present, VALID(done)
-//         obj['phone']=phone
-//       }
-  
-//         if(validateBody.isString(password)){
-//           const encrypt = await bcrypt.hash(password, 10)
-//           obj['password']=encrypt
-//         }
-//         if (address) {
-//           address = JSON.parse(address)//converts text to json object
-//           if (address.shipping) {
-//               if (address.shipping.street) {
-//                   if (!validateBody.isString(address.shipping.street)) {
-//                       return res.status(400).send({ status: false, message: ' Please provide street' })
-//                   }
-//                 obj['address.shipping.street'] = address.shipping.street
-//               }
-//               if (address.shipping.city) {
-//                   if (!validateBody.isString(address.shipping.city)) {
-//                       return res.status(400).send({ status: false, message: ' Please provide city' })
-//                   }
-//                   obj['address.shipping.city'] = address.shipping.city
-//               }
-//               if (address.shipping.pincode) {
-//                   if (typeof address.shipping.pincode !== 'number'){
-//                       return res.status(400).send({ status: false, message: ' Please provide pincode' })
-//                   }
-//                   obj['address.shipping.pincode'] = address.shipping.pincode
-//               }
-//           }
-//           if (address.billing) {
-//             if (address.billing.street) {
-//                 if (!validateBody.isString(address.billing.street)) {
-//                     return res.status(400).send({ status: false, message: ' Please provide street' })
-//                 }
-//                 obj['address.billing.street'] = address.billing.street
-//             }
-//             if (address.billing.city) {
-//                 if (!validateBody.isString(address.billing.city)) {
-//                     return res.status(400).send({ status: false, message: ' Please provide city' })
-//                 }
-//                 obj['address.billing.city'] = address.billing.city
-//             }
-//             if (address.billing.pincode) {
-//                 if (typeof address.billing.pincode !== 'number') {
-//                     return res.status(400).send({ status: false, message: ' Please provide pincode' })
-//                 }
-//                 obj['address.billing.pincode'] = address.billing.pincode
-//             }
-        
-//     } 
-//     if (files && files.length > 0){
-//     let uploadedFileURL = await awsObj.uploadFile(files[0]);
-//     //console.log("string1",uploadedFileURL)
-//     if(uploadedFileURL){
-//       //console.log("string2",uploadedFileURL)
-//       obj['profileImage']=uploadedFileURL
-//     }
-//   }
-//   //console.log(uploadedFileURL)
-  
-//         ///---------------------------------------Validation Ends --------------------------------//
-//         //const encrypt = await bcrypt.hash(password, 10)
-//         //let uploadedFileURL = await uploadFile(files[0]);
-//         const updatedUserData = await userModel.findOneAndUpdate({ _id: userId },obj,{new:true})
-           
-        
-  
-//         res.status(201).send({ status: true,message:`data upadated successfully`, data: updatedUserData })
-//         }
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({ status: false, msg: error.message });
-//     }
-//   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = { userRegistration, userLogin, getUserList, updateUserList }
+module.exports = { userRegistration, userLogin, getUserList, updateUserList}

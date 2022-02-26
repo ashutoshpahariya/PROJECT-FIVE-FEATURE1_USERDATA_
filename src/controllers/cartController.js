@@ -11,18 +11,13 @@ const CartProduct = async function (req, res) {
         const userId = req.params.userId
         const product = req.body.items[0].productId
         const tokenId=req.userId
-        // console.log(userId)
-        // console.log(product)
         const requestBody = req.body
         let { items } = requestBody
+        if (!validateBody.isValidObjectId(userId)) {
+            return res.status(400).send({ status: false, msg: "Invalid user id" })
+         }
         if (!validateBody.isValidObjectId(items[0].productId)) {
             return res.status(404).send({ status: false, message: "productId is not valid" })
-        }
-        if (!validateBody.isValidObjectId(userId)) {
-            res.status(400).send({ status: false, msg: "Invalid user id" })
-        }
-        if (!(validateBody.isValidObjectId(userId) && validateBody.isValidObjectId(tokenId))) {
-            return res.status(400).send({ status: false, message: "userId or token is not valid" });;
         }
         if (!(userId.toString() == tokenId.toString())) {
             return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
@@ -41,9 +36,7 @@ const CartProduct = async function (req, res) {
             const totalItems1 = items.length
             // console.log(totalItems1, 'ashutosh')
             const product = await productModel.findOne({ _id: items[0].productId, isDeleted: false })
-
             if (!product) {
-
                 return res.status(404).send({ status: false, message: "product don't exist or it's deleted" })
             }
             //console.log(product, "product")
@@ -60,7 +53,7 @@ const CartProduct = async function (req, res) {
         }
         else {
             //-USER CART IS ALREADY CREATED ADD MORE CART
-            const product = await productModel.findOne({ _id: items[0].productId }, { isDeleted: false })
+            const product = await productModel.findOne({ _id: items[0].productId , isDeleted: false })
             if (!product) {
                 return res.status(404).send({ status: false, message: "product don't exist or it's deleted" })
             }
@@ -82,7 +75,6 @@ const CartProduct = async function (req, res) {
 
             const cartData = await cartModel.findOneAndUpdate({ userId: userId }, { $addToSet: { items: { $each: items } }, totalPrice: totalPrice1, totalItems: totalItems1 }, { new: true })
             return res.status(201).send({ status: true, message: `product added in the cart successfully1`, data: cartData })
-
         }
     } catch (err) {
 console.log(err)
@@ -120,7 +112,7 @@ const updateCartList = async function (req, res) {
         }
        
         const product = await productModel.findOne({ _id: req.body.productId, isDeleted: false })
-console.log(product)
+        console.log(product)
         //--removeProduct == 1 
         //KEY IS USE FOR REMOVE PRODUCT FROM QUANTITY ONE BY ONE
         if (removeProduct == 1) {
@@ -189,8 +181,8 @@ const getCartList = async (req, res) => {
         let tokenId = req.userId
         console.log(userId)
 
-        if (!(validateBody.isValidObjectId(userId) && validateBody.isValidObjectId(tokenId))) {
-            return res.status(400).send({ status: false, message: "userId or token is not valid" });;
+        if (!(validateBody.isValidObjectId(userId))) {
+            return res.status(400).send({ status: false, message: "userId is not valid" });;
         }
         if (!(userId.toString() == tokenId.toString())) {
             return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
@@ -215,8 +207,8 @@ const deleteCart = async (req, res) => {
     try {
         const userId = req.params.userId
         let tokenId = req.userId
-        if (!(validateBody.isValidObjectId(userId) && validateBody.isValidObjectId(tokenId))) {
-            return res.status(400).send({ status: false, message: "userId or token is not valid" });;
+        if (!(validateBody.isValidObjectId(userId) )) {
+            return res.status(400).send({ status: false, message: "userId or is not valid" });
         }
         if (!(userId.toString() == tokenId.toString())) {
             return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
@@ -225,6 +217,10 @@ const deleteCart = async (req, res) => {
         if (!checkCart) {
             return res.status(404).send({ status: false, msg: "Cart doesn't exist" })
         }
+        if(checkCart.items.length == 0){
+            return res.status(400).send({ status: false, message: "cart is already deleted" });
+        }
+       
         const user = await userModel.findById(userId)
         if (!user) {
             return res.status(404).send({ status: false, msg: "user doesn't exist" })
@@ -239,6 +235,7 @@ const deleteCart = async (req, res) => {
 
 
 }
+
 
 
 module.exports = { CartProduct, updateCartList, getCartList, deleteCart }
